@@ -129,7 +129,77 @@ const onUploadComplete = async ({
       },
     })
   }
+
+  
+
+  //malware detection
+
+     
+  const options = {
+    method: 'POST',
+    headers: {
+      accept: 'application/json',
+      'Content-Type': 'application/x-www-form-urlencoded'
+    },
+    body: new URLSearchParams({
+      url: `https://utfs.io/f/${file.url}`,
+      apikey: '4f714c4d7c793cc8676a7fd24ab22317059b10ae65b51ae0f28d66e3a833d8a4'
+    })
+  };
+  
+  const options1 = {
+    method: 'GET',
+    headers: {
+      accept: 'application/json'
+    }
+  };
+  
+  let intervalId: NodeJS.Timeout; 
+  
+  try {
+    const response = await fetch('https://www.virustotal.com/vtapi/v2/url/scan', options);
+  
+    if (response.ok) {
+      const jsonResponse = await response.json();
+      const scanId = jsonResponse.scan_id;
+  
+      intervalId = setInterval(async () => {
+        const response1 = await fetch(`https://www.virustotal.com/vtapi/v2/url/report?apikey=4f714c4d7c793cc8676a7fd24ab22317059b10ae65b51ae0f28d66e3a833d8a4&resource=${scanId}&allinfo=false&scan=0`, options1);
+        const jsonResponse1 = await response1.json();
+  
+        console.log('Latest detected responses:', jsonResponse1);
+        console.log('Malware detected:', jsonResponse1.positives);
+  
+        
+        if (jsonResponse1.response_code === 1) {
+          clearInterval(intervalId);
+          console.log('Interval stopped due to response_code 0.');
+        }
+        if (jsonResponse1.positives !== 0){
+          await db.file.update({
+            data: {
+              uploadStatus: 'FAILED',
+            },
+            where: {
+              id: createdFile.id,
+            },
+          })
+        }
+      }, 3000);
+
+     
+    }
+  
+  } catch (err) {
+    console.error('Error:', err);
+  }
+
+ 
+  
+  
 }
+
+
 
 export const ourFileRouter = {
   freePlanUploader: f({ pdf: { maxFileSize: '4MB' } })

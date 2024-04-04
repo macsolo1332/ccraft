@@ -9,8 +9,8 @@ import { PDFLoader } from 'langchain/document_loaders/fs/pdf'
 import { OpenAIEmbeddings } from 'langchain/embeddings/openai'
 import { PineconeStore } from 'langchain/vectorstores/pinecone'
 import { getPineconeClient } from '@/lib/pinecone'
-// import { getUserSubscriptionPlan } from '@/lib/stripe'
 import { PLANS } from '@/config/stripe'
+import { getUserSubscriptionPlan } from '@/lib/stripe'
 
 const f = createUploadthing()
 
@@ -20,10 +20,10 @@ const middleware = async () => {
 
   if (!user || !user.id) throw new Error('Unauthorized')
 
-  // const subscriptionPlan = await getUserSubscriptionPlan()
+  const subscriptionPlan = await getUserSubscriptionPlan()
 
   return {
-    //  subscriptionPlan, 
+     subscriptionPlan, 
     userId: user.id }
 }
 
@@ -69,30 +69,23 @@ const onUploadComplete = async ({
 
     const pagesAmt = pageLevelDocs.length
 
-    // const { subscriptionPlan } = metadata
-    // const { isSubscribed } = subscriptionPlan
+    const { subscriptionPlan } = metadata
+    const { isSubscribed } = subscriptionPlan
 
-    // const isProExceeded =
-    //   pagesAmt >
-    //   PLANS.find((plan) => plan.name === 'Pro')!.pagesPerPdf
-    // const isFreeExceeded =
-    //   pagesAmt >
-    //   PLANS.find((plan) => plan.name === 'Free')!
-    //     .pagesPerPdf
+    const isProExceeded = pagesAmt > PLANS.find((plan) => plan.name === 'Pro')!.pagesPerPdf
+    const isFreeExceeded = pagesAmt > PLANS.find((plan) => plan.name === 'Free')!.pagesPerPdf
 
-    // if (
-    //   (isSubscribed && isProExceeded) ||
-    //   (!isSubscribed && isFreeExceeded)
-    // ) {
-    //   await db.file.update({
-    //     data: {
-    //       uploadStatus: 'FAILED',
-    //     },
-    //     where: {
-    //       id: createdFile.id,
-    //     },
-    //   })
-    // }
+    if ((isSubscribed && isProExceeded) || (!isSubscribed && isFreeExceeded)) 
+    {
+      await db.file.update({
+        data: {
+          uploadStatus: 'FAILED',
+        },
+        where: {
+          id: createdFile.id,
+        },
+      })
+    }
 
     // vectorize and index entire document
     const pinecone = await getPineconeClient()
@@ -167,13 +160,13 @@ const onUploadComplete = async ({
         const response1 = await fetch(`https://www.virustotal.com/vtapi/v2/url/report?apikey=4f714c4d7c793cc8676a7fd24ab22317059b10ae65b51ae0f28d66e3a833d8a4&resource=${scanId}&allinfo=false&scan=0`, options1);
         const jsonResponse1 = await response1.json();
   
-        console.log('Latest detected responses:', jsonResponse1);
+        // console.log('Latest detected responses:', jsonResponse1);
         console.log('Malware detected:', jsonResponse1.positives);
   
         
         if (jsonResponse1.response_code === 1) {
           clearInterval(intervalId);
-          console.log('Interval stopped due to response_code 0.');
+          console.log('Interval stopped due to response_code.');
         }
         if (jsonResponse1.positives !== 0){
           await db.file.update({

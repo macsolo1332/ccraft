@@ -32,7 +32,7 @@ export const Translation: React.FC<TranslationProps> = (props: TranslationProps)
     setTranslatedText(response.data.translationResponse.translation_text);  
     
     setShowTranslation(true); // Show the translation
-    console.log("respone :", translation);
+    // console.log("respone :", translation);
   };
 
   function generateTranslation() {
@@ -41,7 +41,7 @@ export const Translation: React.FC<TranslationProps> = (props: TranslationProps)
     }
 
     setTranslating(true);
-    console.log('transilation language :', toLanguage);
+    // console.log('transilation language :', toLanguage);
     fetchTranslation();
   }
 

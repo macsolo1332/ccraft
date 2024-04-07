@@ -23,7 +23,7 @@ export const POST = async (req: Request) => {
     // Add more models as needed
   };
 
-  const translationResponse = await inference.translation({
+   const translationResponse = await inference.translation({
     model: languageModels[lang], // Select the model based on the language
     inputs: text,
   });
@@ -35,10 +35,4 @@ export const POST = async (req: Request) => {
   })
 }
 
-// export default function handler(req: NextApiRequest, res: NextApiResponse) {
-//   if (req.method === 'POST') {
-//     // Process a POST request
-//   } else {
-//     // Handle any other HTTP method
-//   }
-// }
+

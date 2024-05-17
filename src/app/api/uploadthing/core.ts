@@ -160,7 +160,7 @@ const onUploadComplete = async ({
         const response1 = await fetch(`https://www.virustotal.com/vtapi/v2/url/report?apikey=4f714c4d7c793cc8676a7fd24ab22317059b10ae65b51ae0f28d66e3a833d8a4&resource=${scanId}&allinfo=false&scan=0`, options1);
         const jsonResponse1 = await response1.json();
   
-        // console.log('Latest detected responses:', jsonResponse1);
+        console.log('Latest detected responses:', jsonResponse1);
         console.log('Malware detected:', jsonResponse1.positives);
   
         
